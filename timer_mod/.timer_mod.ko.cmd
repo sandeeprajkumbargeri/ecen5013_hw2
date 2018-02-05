@@ -1,0 +1,1 @@
+cmd_/home/sandeep/Documents/hw2/timer_mod/timer_mod.ko := ld -r -m elf_x86_64 -T ./scripts/module-common.lds --build-id  -o /home/sandeep/Documents/hw2/timer_mod/timer_mod.ko /home/sandeep/Documents/hw2/timer_mod/timer_mod.o /home/sandeep/Documents/hw2/timer_mod/timer_mod.mod.o ;  true
