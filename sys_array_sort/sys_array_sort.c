@@ -1,6 +1,18 @@
+/*
+
+Filename: sys_array_sort.c
+Author: Sandeep Raj Kumbargeri
+Description: Implements selection sort algorithm in the kernel space using a syscall
+Written for ECEN 5013 Homework 2 in Spring 2018 at University of Colorado Boulder
+
+*/
+
+//Headers
 #include <linux/kernel.h>
 #include <linux/syscall.h>
 
+
+// Main system call function
 SYSCALL_DEFINE3(array_sort, int32_t __user *, src_buffer, size_t __user, buffer_size, int32_t __user *, dst_buffer)
 {
   unsigned int elements = 0, i = 0, j = 0, min_index;
@@ -15,7 +27,7 @@ SYSCALL_DEFINE3(array_sort, int32_t __user *, src_buffer, size_t __user, buffer_
       return -EFAULT;
     }
 
-  data_item = (int32_t *) kmalloc(buffer_size, GFP_KERNEL);
+  data_item = (int32_t *) kmalloc(buffer_size, GFP_KERNEL); //dynamically allocating memory for storing sorting data
   if(data_item == NULL)
   {
     printk(KERN_ERROR "SYS_CALL : ARRAY_SORT_DESCENDING :: Error creating buffer.\n");
@@ -23,17 +35,18 @@ SYSCALL_DEFINE3(array_sort, int32_t __user *, src_buffer, size_t __user, buffer_
     return -EFAULT;
   }
 
-  if(copy_from_user(data_item, src_buffer, buffer_size))
+  if(copy_from_user(data_item, src_buffer, buffer_size)) //copying data from user space to kernel space
   {
     printk(KERN_ERROR "SYS_CALL : ARRAY_SORT_DESCENDING :: Error copying user buffer data to kernel buffer.\n");
     kfree(data_item);
     return -EFAULT;
   }
 
-  elements = buffer_size / sizeof(int32_t);
+  elements = buffer_size / sizeof(int32_t); //calculating the number of elements
 
   printk(KERN_INFO "SYS_CALL : ARRAY_SORT_DESCENDING :: Starting sort.\n");
 
+  // Performing selection sort
   for (i = 0; i < elements - 1; i++)
   {
     min_index = i;
@@ -51,13 +64,13 @@ SYSCALL_DEFINE3(array_sort, int32_t __user *, src_buffer, size_t __user, buffer_
 
   printk(KERN_INFO "SYS_CALL : ARRAY_SORT_DESCENDING :: Sort complete.\n");
 
-  if(copy_to_user(dst_buffer, data_item, buffer_size))
+  if(copy_to_user(dst_buffer, data_item, buffer_size))  //Copying back sorted array to user space from kernel space
   {
     printk(KERN_ERROR "SYS_CALL : ARRAY_SORT_DESCENDING :: Error copying kernel buffer data to user buffer.\n");
     kfree(data_item);
     return -EFAULT;
   }
 
-  kfree(data_item);
+  kfree(data_item); //freeing the dynamically allocated memory in the kernel spcace
   return 0;
 }
